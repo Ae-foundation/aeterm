@@ -5,10 +5,16 @@
 #include <unistd.h>
 #include <sys/wait.h>
 #include <fcntl.h>
-#include <pty.h>
+#include <ctype.h>
+#ifdef __OpenBSD__
+  #include <util.h>
+#else
+  #include <pty.h>
+#endif
 #include <utmp.h>
 #include <errno.h>
 #include <signal.h>
+#include <termios.h>
 
 #include <SDL2/SDL.h>
 #include <SDL2/SDL_ttf.h>
@@ -261,16 +267,20 @@ void handle_input(char c) {
 }
 
 
+#ifndef __OpenBSD__
 void handle_sigwinch(int sig) {
   struct winsize ws;
   ws.ws_row = ROWS;
   ws.ws_col = COLS;
   ioctl(master_fd, TIOCSWINSZ, &ws);
 }
+#endif
 
 int main(int argc, char* argv[]) {
-  setenv("TERM", "xterm-256color", 1);
+  setenv("TERM", "aeterm", 1);
+  #ifndef __OpenBSD__
   signal(SIGWINCH, handle_sigwinch);
+  #endif
 
   if (SDL_Init(SDL_INIT_VIDEO) < 0) {
     printf("SDL2 could not be initialized!\nSDL2 Error: %s\n", SDL_GetError());
@@ -326,7 +336,9 @@ int main(int argc, char* argv[]) {
   fcntl(master_fd, F_SETFL, O_NONBLOCK);
 
   // Устанавливаем размер терминала
+  #ifndef __OpenBSD__
   handle_sigwinch(0);
+  #endif
 
   bool quit = false;
   while (!quit) {
