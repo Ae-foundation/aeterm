@@ -6,12 +6,15 @@
 #include <sys/wait.h>
 #include <fcntl.h>
 #include <ctype.h>
-#ifdef __OpenBSD__
+#if defined(__OpenBSD__)
   #include <util.h>
+  #include <utmp.h>
+#elif defined(__FreeBSD__)
+  #include <libutil.h>
 #else
   #include <pty.h>
+  #include <utmp.h>
 #endif
-#include <utmp.h>
 #include <errno.h>
 #include <signal.h>
 #include <termios.h>
@@ -132,7 +135,11 @@ void render_term() {
   }
 
 int escx,escy;
-char ra,ga,ba;
+#if defined(__FreeBSD__)
+  int ra,ga,ba;
+#else
+  char ra,ga,ba;
+#endif
 void handle_escape_sequence(const char* seq) {
   if (strstr(seq, "H")) {
     if (sscanf(seq, "\033[%d;%dH",&escy,&escx) == 2) {

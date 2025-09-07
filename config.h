@@ -1,7 +1,7 @@
 #ifndef CONFIG_H
 #define CONFIG_H
 
-#define CONFIG_SHELL "bash"
+#define CONFIG_SHELL "aesh"
 
 #define CONFIG_CURSOR_COLOR (Color){0xFF,0xFF,0xFF,0xFF}
 #define CONFIG_BGCOLOR      (Color){0x08,0x08,0x08,0xFF}
